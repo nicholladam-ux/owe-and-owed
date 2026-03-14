@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Owe &amp; Owed">
+<meta name="theme-color" content="#f5f4f0">
+<link rel="manifest" href="manifest.json">
+<title>Owe &amp; Owed</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:         #f5f4f0;
+    --surface:    #ffffff;
+    --border:     #e4e2dc;
+    --border-light: #eeede9;
+    --owe:        #c0392b;
+    --owe-bg:     #fdf1f0;
+    --owe-border: #f0c8c4;
+    --owed:       #217a52;
+    --owed-bg:    #f0f8f4;
+    --owed-border:#b8e0cc;
+    --text:       #1a1916;
+    --text-muted: #888480;
+    --text-light: #b0ada8;
+    --accent:     #1a1916;
+    --radius:     12px;
+    --radius-sm:  8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    min-height: 100vh;
+    padding-bottom: 110px;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 22px 20px 18px;
+  }
+
+  .header-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: var(--text);
+  }
+
+  .header-title .owe  { color: var(--owe); }
+  .header-title .amp  { color: var(--text-light); margin: 0 4px; }
+  .header-title .owed { color: var(--owed); }
+
+  .totals-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 16px 16px 0;
+  }
+
+  .total-card {
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    border: 1px solid;
+  }
+
+  .total-card.owe-card  { background: var(--owe-bg);  border-color: var(--owe-border); }
+  .total-card.owed-card { background: var(--owed-bg); border-color: var(--owed-border); }
+
+  .tc-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .owe-card  .tc-label { color: var(--owe); }
+  .owed-card .tc-label { color: var(--owed); }
+
+  .tc-amount {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .owe-card  .tc-amount { color: var(--owe); }
+  .owed-card .tc-amount { color: var(--owed); }
+
+  .tc-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 5px; }
+
+  .section-hdr {
+    padding: 24px 16px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .section-hdr-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .section-hdr-sub { font-size: 0.7rem; color: var(--text-light); }
+
+  .person-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+
+  .person-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .person-name { font-size: 1rem; font-weight: 600; margin-bottom: 4px; }
+
+  .person-detail { font-size: 0.75rem; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; }
+
+  .person-net { font-size: 1rem; font-weight: 700; text-align: right; }
+  .person-net-label { font-size: 0.7rem; color: var(--text-muted); text-align: right; margin-top: 2px; }
+
+  .entries { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+
+  .entry {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+
+  .entry.settled { opacity: 0.42; }
+
+  .entry-name { font-size: 1rem; font-weight: 600; margin-bottom: 2px; }
+  .entry-for { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 7px; }
+  .entry-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .entry-date { font-size: 0.72rem; color: var(--text-light); }
+
+  .badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 99px;
+    border: 1px solid;
+  }
+
+  .badge.owe  { color: var(--owe);  border-color: var(--owe-border);  background: var(--owe-bg); }
+  .badge.owed { color: var(--owed); border-color: var(--owed-border); background: var(--owed-bg); }
+  .badge.done { color: var(--text-light); border-color: var(--border); background: var(--bg); }
+
+  .entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+
+  .entry-amount { font-size: 1.1rem; font-weight: 700; letter-spacing: -0.02em; }
+  .entry-amount.red   { color: var(--owe); }
+  .entry-amount.green { color: var(--owed); }
+
+  .entry-actions { display: flex; gap: 6px; }
+
+  .icon-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    transition: all 0.12s;
+  }
+
+  .icon-btn:hover { background: var(--border-light); color: var(--text); }
+  .icon-btn.is-settled { color: var(--owed); border-color: var(--owed-border); background: var(--owed-bg); }
+  .icon-btn.del:hover  { color: var(--owe);  border-color: var(--owe-border);  background: var(--owe-bg); }
+
+  .toggle-row {
+    padding: 0 16px 2px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+  }
+
+  .sw { position: relative; width: 36px; height: 20px; cursor: pointer; flex-shrink: 0; }
+  .sw input { display: none; }
+  .sw-track { display: block; width: 36px; height: 20px; background: var(--border); border-radius: 99px; transition: background 0.2s; }
+  .sw input:checked + .sw-track { background: var(--owed); }
+  .sw-thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.15); pointer-events: none; }
+  .sw input:checked ~ .sw-thumb { transform: translateX(16px); }
+
+  .empty { padding: 32px 16px; text-align: center; color: var(--text-light); font-size: 0.85rem; line-height: 1.9; }
+
+  .fab {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 16px 36px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+    transition: transform 0.12s, box-shadow 0.12s;
+    white-space: nowrap;
+    z-index: 50;
+  }
+
+  .fab:hover  { transform: translateX(-50%) scale(1.04); }
+  .fab:active { transform: translateX(-50%) scale(0.97); }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .overlay.open { display: flex; }
+
+  .popup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 22px 22px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.14);
+    animation: popIn 0.16s ease;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .popup-title { font-size: 1.2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 16px; }
+
+  .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+
+  .type-btn {
+    padding: 11px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.12s;
+    text-align: center;
+  }
+
+  .type-btn.sel-owe  { background: var(--owe-bg);  border-color: var(--owe);  color: var(--owe);  font-weight: 600; }
+  .type-btn.sel-owed { background: var(--owed-bg); border-color: var(--owed); color: var(--owed); font-weight: 600; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .form-row.full { grid-template-columns: 1fr; }
+
+  .field label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 13px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus { border-color: var(--text); }
+  .field input::placeholder { color: var(--text-light); }
+
+  .popup-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-top: 16px; }
+
+  .cancel-btn {
+    padding: 13px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .save-btn {
+    padding: 13px;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .save-btn.owe  { background: var(--owe);  color: #fff; }
+  .save-btn.owed { background: var(--owed); color: #fff; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <span class="owe">Owe</span><span class="amp"> & </span><span class="owed">Owed</span>
+  </div>
+</header>
+
+<div class="totals-row">
+  <div class="total-card owe-card">
+    <div class="tc-label">I Owe</div>
+    <div class="tc-amount" id="total-owe">$0.00</div>
+    <div class="tc-sub" id="count-owe">0 pending</div>
+  </div>
+  <div class="total-card owed-card">
+    <div class="tc-label">Owed to Me</div>
+    <div class="tc-amount" id="total-owed">$0.00</div>
+    <div class="tc-sub" id="count-owed">0 pending</div>
+  </div>
+</div>
+
+<div class="section-hdr">
+  <span class="section-hdr-title">By Person</span>
+  <span class="section-hdr-sub">pending only</span>
+</div>
+<div class="person-list" id="person-list"></div>
+
+<div class="section-hdr">
+  <span class="section-hdr-title" id="entries-hdr">All Entries</span>
+</div>
+<div class="toggle-row">
+  <label class="sw">
+    <input type="checkbox" id="show-settled" onchange="renderAll()">
+    <span class="sw-track"></span>
+    <span class="sw-thumb"></span>
+  </label>
+  Show settled entries
+</div>
+<br>
+<div class="entries" id="all-entries"></div>
+
+<button class="fab" onclick="openPopup()">+ Add Entry</button>
+
+<div class="overlay" id="overlay" onclick="bgClick(event)">
+  <div class="popup">
+    <div class="popup-title">New Entry</div>
+    <div class="type-toggle">
+      <button class="type-btn sel-owe" id="btn-owe" onclick="setType('owe')">💸 I Owe</button>
+      <button class="type-btn" id="btn-owed" onclick="setType('owed')">🤝 They Owe Me</button>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Person</label><input type="text" id="f-person" placeholder="e.g. Alex"></div>
+      <div class="field"><label>Amount ($)</label><input type="number" id="f-amount" placeholder="0.00" min="0" step="0.01"></div>
+    </div>
+    <div class="form-row full">
+      <div class="field"><label>What for</label><input type="text" id="f-for" placeholder="e.g. Dinner, rent, tickets…"></div>
+    </div>
+    <div class="form-row full">
+      <div class="field"><label>Date</label><input type="date" id="f-date"></div>
+    </div>
+    <div class="popup-actions">
+      <button class="cancel-btn" onclick="closePopup()">Cancel</button>
+      <button class="save-btn owe" id="save-btn" onclick="saveEntry()">Add — I Owe</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Service Worker (makes the app installable on Android Chrome) ──
+  if ('serviceWorker' in navigator) {
+    const sw = `
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+    `;
+    const blob = new Blob([sw], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+  }
+
+  // ── Data ──
+  function load() {
+    try { return JSON.parse(localStorage.getItem('oweowed_v2') || '{"owe":[],"owed":[]}'); }
+    catch { return { owe: [], owed: [] }; }
+  }
+  function save() { localStorage.setItem('oweowed_v2', JSON.stringify(data)); }
+
+  let data = load();
+  let currentType = 'owe';
+
+  // ── Popup ──
+  function openPopup() {
+    document.getElementById('overlay').classList.add('open');
+    document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+    setTimeout(() => document.getElementById('f-person').focus(), 60);
+  }
+
+  function closePopup() {
+    document.getElementById('overlay').classList.remove('open');
+    ['f-person','f-amount','f-for'].forEach(id => document.getElementById(id).value = '');
+  }
+
+  function bgClick(e) { if (e.target === document.getElementById('overlay')) closePopup(); }
+
+  function setType(t) {
+    currentType = t;
+    document.getElementById('btn-owe').className  = 'type-btn' + (t === 'owe'  ? ' sel-owe'  : '');
+    document.getElementById('btn-owed').className = 'type-btn' + (t === 'owed' ? ' sel-owed' : '');
+    const btn = document.getElementById('save-btn');
+    btn.className = 'save-btn ' + t;
+    btn.textContent = t === 'owe' ? 'Add — I Owe' : 'Add — They Owe Me';
+  }
+
+  function saveEntry() {
+    const person  = document.getElementById('f-person').value.trim();
+    const amount  = parseFloat(document.getElementById('f-amount').value);
+    const forWhat = document.getElementById('f-for').value.trim();
+    const date    = document.getElementById('f-date').value;
+    if (!person || isNaN(amount) || amount <= 0 || !forWhat) {
+      alert('Please fill in Person, Amount, and What For.');
+      return;
+    }
+    data[currentType].unshift({ id: Date.now(), person, amount, forWhat, date, settled: false });
+    save(); closePopup(); renderAll();
+  }
+
+  function toggleSettle(type, id) {
+    const e = data[type].find(e => e.id === id);
+    if (e) { e.settled = !e.settled; save(); renderAll(); }
+  }
+
+  function deleteEntry(type, id) {
+    if (!confirm('Delete this entry?')) return;
+    data[type] = data[type].filter(e => e.id !== id);
+    save(); renderAll();
+  }
+
+  function fmt(n) { return '$' + parseFloat(n).toFixed(2); }
+
+  function fmtDate(d) {
+    if (!d) return '';
+    const [y,m,day] = d.split('-');
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][parseInt(m)-1]
+      + ' ' + parseInt(day) + ', ' + y;
+  }
+
+  function entryHTML(type, e) {
+    const isOwe = type === 'owe';
+    return `
+      <div class="entry ${e.settled ? 'settled' : ''}">
+        <div>
+          <div class="entry-name">${e.person}</div>
+          <div class="entry-for">${e.forWhat}</div>
+          <div class="entry-meta">
+            <span class="entry-date">${fmtDate(e.date)}</span>
+            <span class="badge ${e.settled ? 'done' : (isOwe ? 'owe' : 'owed')}">
+              ${e.settled ? 'Settled' : (isOwe ? 'I Owe' : 'They Owe')}
+            </span>
+          </div>
+        </div>
+        <div class="entry-right">
+          <div class="entry-amount ${isOwe ? 'red' : 'green'}">${fmt(e.amount)}</div>
+          <div class="entry-actions">
+            <button class="icon-btn ${e.settled ? 'is-settled' : ''}"
+              onclick="toggleSettle('${type}',${e.id})">${e.settled ? '↩' : '✓'}</button>
+            <button class="icon-btn del"
+              onclick="deleteEntry('${type}',${e.id})">✕</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderAll() {
+    const showSettled = document.getElementById('show-settled').checked;
+
+    const owePending  = data.owe.filter(e => !e.settled);
+    const owedPending = data.owed.filter(e => !e.settled);
+    document.getElementById('total-owe').textContent  = fmt(owePending.reduce((s,e)  => s+e.amount, 0));
+    document.getElementById('total-owed').textContent = fmt(owedPending.reduce((s,e) => s+e.amount, 0));
+    document.getElementById('count-owe').textContent  = owePending.length  + ' pending';
+    document.getElementById('count-owed').textContent = owedPending.length + ' pending';
+
+    const people = {};
+    data.owe.filter(e => !e.settled).forEach(e  => { if (!people[e.person]) people[e.person]={owe:0,owed:0}; people[e.person].owe  += e.amount; });
+    data.owed.filter(e => !e.settled).forEach(e => { if (!people[e.person]) people[e.person]={owe:0,owed:0}; people[e.person].owed += e.amount; });
+
+    const pl = document.getElementById('person-list');
+    const pe = Object.entries(people);
+    pl.innerHTML = pe.length === 0
+      ? `<div class="empty">No pending entries yet.<br>Tap <strong>+ Add Entry</strong> below to get started.</div>`
+      : pe.map(([name, t]) => {
+          const net = t.owed - t.owe;
+          const col = net >= 0 ? 'var(--owed)' : 'var(--owe)';
+          const lbl = net === 0 ? 'Even' : net > 0 ? 'They owe you' : 'You owe them';
+          return `<div class="person-card">
+            <div>
+              <div class="person-name">${name}</div>
+              <div class="person-detail">
+                ${t.owe  > 0 ? `<span style="color:var(--owe)">You owe: ${fmt(t.owe)}</span>`   : ''}
+                ${t.owed > 0 ? `<span style="color:var(--owed)">They owe: ${fmt(t.owed)}</span>` : ''}
+              </div>
+            </div>
+            <div>
+              <div class="person-net" style="color:${col}">${fmt(Math.abs(net))}</div>
+              <div class="person-net-label">${lbl}</div>
+            </div>
+          </div>`;
+        }).join('');
+
+    let all = [
+      ...data.owe.map(e  => ({...e, type:'owe'})),
+      ...data.owed.map(e => ({...e, type:'owed'}))
+    ];
+    if (!showSettled) all = all.filter(e => !e.settled);
+    all.sort((a,b) => a.settled !== b.settled ? (a.settled ? 1 : -1) : (b.date||'').localeCompare(a.date||''));
+
+    const pending = all.filter(e => !e.settled).length;
+    document.getElementById('entries-hdr').textContent =
+      pending + ' Pending' + (showSettled ? ' · + settled' : '');
+
+    document.getElementById('all-entries').innerHTML = all.length === 0
+      ? `<div class="empty">Nothing to show here.</div>`
+      : all.map(e => entryHTML(e.type, e)).join('');
+  }
+
+  renderAll();
+</script>
+</body>
+</html>
