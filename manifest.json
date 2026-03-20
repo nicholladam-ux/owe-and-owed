@@ -2,7 +2,7 @@
   "name": "Owe & Owed",
   "short_name": "Owe & Owed",
   "description": "Track who you owe and who owes you",
-  "start_url": "./owe-and-owed.html",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#f5f4f0",
   "theme_color": "#f5f4f0",
